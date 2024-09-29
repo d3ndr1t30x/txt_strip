@@ -1,0 +1,1838 @@
+Hacking with Kali Linux - Part 2 - Bash Scripting
+1
+🐉
+Hacking with Kali Linux - Part 2 - 
+Bash Scripting
+Contents Page
+Contents Page
+Bash-con
+Environmental Setup-con
+Accessing the Bash Shell-con
+Windows-con
+Installing a Text Editor-con
+Checking Environment Variables-con
+Elements of a Bash Script-con
+The Shebang Line
+Comments
+Additional Uses of Comments
+Commands
+Execution
+Debugging
+Basic Syntax
+Variables
+Naming Rules for Bash Variables
+Assigning and Accessing Variables
+Unassigning Variables
+Scoping Variables
+Arithmetic Operators
+Arrays
+Streams
+Control Operators
+Positional Arguments
+Input Prompting
+Exit Status Codes
+Checking Status Codes
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+2
+Bash-con
+Bash is essential for automating tasks in Linux, making it a key skill for penetration 
+testers. This chapter covers setting up your environment, key Linux commands, 
+and Bash basics like variables, arrays, streams, arguments, and operators.
+Environmental Setup-con
+Before learning Bash, you'll need a Bash shell and a text editor. This section 
+explains how to access them on any major OS.
+Accessing the Bash Shell-con
+Setting a Script’s Exit Codes
+If Conditions
+Linking Conditions
+Running Code Only If a Command Succeeds
+Using elif
+Functions
+Returning Values
+Accepting Arguments
+Loops and Loop Controls
+while
+The break and continue statements
+Case Statements
+Text Processing and Parsing
+Filtering with grep
+Filtering with awk
+Editing Streams with sed
+Job Control
+Managing Background and Foreground Jobs
+Bash Customizations for Penetration Testers
+Placing Scripts in Searchable Paths
+Shortening Commands with Aliases
+Customizing the Bash Run Commands Profile (bashrc)
+Importing Custom Scripts
+Capturing Terminal Session Activity
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+3
+Linux/macOS: Bash is pre-installed. Open the Terminal with ALT+CTRL+T on Linux 
+or via Launchpad on macOS. Since Kali and macOS use Z Shell by default, switch 
+to Bash with exec bash . To set Bash as your default shell, run chsh -s /bin/bash .
+Windows-con
+To run Bash on Windows, use the Windows Subsystem for Linux (WSL) and follow 
+the installation instructions at Microsoft WSL. Alternatively, install Cygwin, which 
+emulates a Linux environment. Save your scripts in the Cygwin home directory 
+(C:/cygwin64/home/your_username) to run them from the Cygwin terminal.
+Here are the links for the installations mentioned:
+1. Windows Subsystem for Linux (WSL): Microsoft WSL Installation
+2. Cygwin: Cygwin Installation
+Installing a Text Editor-con
+To write Bash scripts, you'll need a text editor with syntax highlighting. You can 
+use terminal-based editors like vi or nano for penetration tests, or graphical 
+editors like Sublime Text. In Sublime, enable syntax highlighting by selecting "Plain 
+Text" in the bottom-right corner and choosing Bash. For other editors, consult 
+their documentation for syntax highlighting options.
+Exploring the Shell
+With your Bash environment set up, start learning by running commands in the 
+terminal to test them before adding them to scripts. Verify that Bash is available by 
+running:
+bash --version
+Checking Environment Variables-con
+Bash loads a set of environment variables with each terminal session, storing 
+information like the user’s identity, home directory, and default shell.
+To view all environment variables, run:
+env
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+4
+To read a specific variable, use the echo  command. For example, to print the 
+default shell:
+echo ${SHELL}
+This command expands the SHELL variable to display its value. Table 1-2 lists 
+some common default environment variables.
+Variable name
+What It Returns
+BASH_VERSION
+The bash version running
+BASHPID
+The process ID of the current bash process
+GROUPS
+A list of groups the running user is a member of
+HOSTNAME
+The name of the host
+OSTYPE
+The type of operating system
+PWD
+The current working directory
+RANDOM
+A random number between 0 and 32,767
+UID
+The user ID of the current user
+SHELL
+The full pathname to the shell
+Try checking the values of these environment variables:
+echo ${RANDOM}
+echo ${UID}
+echo ${OSTYPE}
+The full list of environment variables are here: 
+https://www.gnu.org/software/bash/manual/html_node/Bash- Variables.html.
+Elements of a Bash Script-con
+This section covers the fundamentals of a Bash script, including using comments 
+for documentation, specifying an interpreter, and formatting for readability.
+While Bash lacks an official style guide, consistent coding conventions are vital, 
+especially in team environments. Good practices enhance readability and 
+efficiency, particularly in exploit code repositories.
+The Shebang Line
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+5
+Every script should start with a shebang line, which begins with #! , followed by 
+the full path to the script interpreter. For a typical Bash script, the shebang looks 
+like this:
+#!/bin/bash
+This specifies the Bash interpreter, typically located at /bin/bash . If you were using 
+Python or Ruby, the path would point to those interpreters.
+You may also encounter a more portable shebang line:
+#!/usr/bin/env bash
+This version searches the system for the Bash interpreter, useful in cases where 
+the interpreter's location varies across Linux distributions. This can be particularly 
+helpful in penetration testing environments, where the location of Bash might be 
+unknown on the target system. However, for simplicity, we'll use the version from 
+the first example throughout this book.
+The shebang line can also accept optional arguments to modify script execution. 
+For instance:
+#!/bin/bash -x
+This enables debugging by printing each command and its arguments as they are 
+executed. Another example:
+#!/bin/bash -r
+This creates a restricted shell, preventing certain commands from being executed, 
+like navigating to certain directories or modifying sensitive environment variables.
+You can also pass arguments directly to the Bash interpreter on the command line, 
+as shown here:
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+6
+bash -r myscript.sh
+Whether you pass arguments on the command line or in the shebang line, the 
+result is the same. Using the command line is simply a more flexible way to trigger 
+different modes.
+Comments
+Comments in Bash are lines of text that the interpreter ignores, making them 
+useful for documenting code and improving readability. For example, if you write a 
+long script and need to update it years later, comments will help you understand 
+the logic behind each section.
+In Bash, comments begin with a pound sign ( # ), as seen below:
+#!/bin/bash
+# This is my first script.
+Except for the shebang line, any line that starts with #  is treated as a comment. 
+Even if you include a second shebang, it will be ignored as a comment.
+For multiline comments, simply start each line with a # , like this:
+#!/bin/bash
+# This is my first script!
+# Bash scripting is fun...
+Additional Uses of Comments
+Beyond explaining logic, comments can include metadata such as the author’s 
+name, the script version, or contact information for reporting issues. These 
+comments are typically placed at the top of the script, just below the shebang line.
+Commands
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+7
+A Bash script can be as simple as two lines: the shebang line and a Linux 
+command. Let's create a basic script that prints "Hello World" to the terminal. 
+Open a text editor and enter the following:
+#!/bin/bash
+echo "Hello World!"
+Here, the shebang line specifies Bash as the interpreter, and the echo  command 
+prints the string "Hello World!" to the terminal.
+Execution
+To run the script, save it as helloworld.sh. Open the terminal and navigate to the 
+directory where the script is saved. For example, if it's in your home directory, use 
+the following commands:
+cd ~
+chmod u+x helloworld.sh
+./helloworld.sh
+Output:
+Hello World!
+The cd  command changes directories. The tilde ( ~ ) represents the current 
+user's home directory.
+chmod u+x  grants the user (you) execute permission for the script.
+./helloworld.sh  runs the script from the current directory. The ./  notation 
+indicates that the script resides in the current working directory.
+Alternatively, you can run the script using the Bash command directly:
+bash helloworld.sh
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+8
+In this case, the script runs without needing executable permissions or a shebang 
+line since you are explicitly invoking Bash to execute the file.
+Later, we'll dive deeper into file permissions and their importance, especially when 
+identifying misconfigurations during penetration tests.
+Debugging
+Errors are inevitable when developing Bash scripts, but debugging is 
+straightforward. A simple method for checking errors early is using the -n  
+parameter. This option reads the script without executing it, revealing any syntax 
+errors—a useful way to perform a "dry run" to validate the syntax:
+bash -n script.sh
+For real-time debugging, you can use the -x  parameter to enable verbose mode, 
+which displays each command as it’s executed, helping you track down issues:
+bash -x script.sh
+If you want to debug only a specific part of your script, you can control when 
+debugging starts and stops by using the set  command within the script:
+#!/bin/bash
+set -x
+# Commands you want to debug
+set +x
+Here, set -x  enables debugging, and set +x  disables it. This approach limits the 
+amount of output noise in your terminal, especially when debugging larger scripts 
+with specific problem areas.
+Basic Syntax
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+9
+You've written a simple two-line script that prints "Hello World!" and learned how 
+to run and debug scripts. Now, let’s explore basic Bash syntax to write more 
+complex scripts.
+At its core, a Bash script is a collection of Linux commands in a single file. For 
+example, here’s a script that creates a directory, adds a file to it, and then lists the 
+directory contents:
+#!/bin/bash
+# This script creates a directory, adds a file inside it,
+# and lists the directory contents.
+mkdir mydirectory
+touch mydirectory/myfile
+ls -l mydirectory
+In this example:
+mkdir  creates a directory named mydirectory.
+touch  creates an empty file named myfile within the directory.
+ls -l  lists the contents of the directory, showing details like permissions, 
+owner, and timestamp.
+The output of the script might look like this:
+-rw-r--r-- 1 user user 0 Feb 16 13:37 myfile
+While this line-by-line approach works, it can be improved. For example, Bash 
+waits for each command to complete before moving to the next, so if a command 
+like file copying takes a long time, subsequent commands will be delayed. 
+Additionally, there are no checks to ensure that each command succeeds, which 
+can lead to runtime errors.
+Writing more advanced scripts involves using features like variables, conditions, 
+loops, and tests. For example, you might want to:
+Check available disk space before creating files and directories.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+10
+Verify whether the directory and file creation actions were successful.
+The following sections will introduce these syntactical elements, allowing you to 
+write more intelligent and reliable Bash scripts.
+Variables
+In Bash, variables are names assigned to memory locations that store values, 
+acting as placeholders. You can assign values directly to variables or use the 
+output of Bash commands to store results in variables for later use.
+Unlike many programming languages where variables have specific types (e.g., 
+integers, strings, arrays), Bash variables are untyped and treated as character 
+strings. However, you can still create arrays, access elements, and perform 
+arithmetic operations on numeric values.
+Naming Rules for Bash Variables
+Variables can include alphanumeric characters.
+Variables cannot start with a numerical character.
+They can contain underscores ( _ ).
+They cannot contain whitespace.
+Assigning and Accessing Variables
+To assign a variable, use the following syntax. For example:
+book="shell scripting"
+This creates a variable named book  and assigns it the value "Bash Scripting" . You 
+can then use this variable in commands. For example, to print the variable's value:
+echo "This book's name is ${book}"
+This book's name is shell scripting
+Output:
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+11
+ 
+This book's name is Bash Scripting
+Here, ${book}  expands to the value of the book  variable.
+You can also assign the output of a command to a variable using command 
+substitution ( $() ):
+$ root_directory="$(ls -ld /)"
+$ echo "${root_directory}"
+Output:
+drwxr-xr-x 1 user user 12 Feb 13 20:12 /
+This assigns the output of ls -ld /  to the variable root_directory  and then prints it. 
+The output provides metadata about the root directory, including permissions, 
+size, owner, and modification timestamp.
+Important: When assigning a value to a variable, do not leave 
+whitespace around the = sign. For example, the following is 
+invalid:
+book = "this is an invalid variable assignment"
+Unassigning Variables
+To unassign (unset) a variable, use the unset  command:
+$ book="Bash Scripting"
+$ unset book
+$ echo "${book}"
+Output:
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+12
+(no output, as the variable has been unset)
+Scoping Variables
+Global variables are those available to the entire program. But variables in bash 
+can also be scoped so that they are only accessible from within a certain block of 
+code. These variables are called local variables and are declared using the local 
+keyword. The following script shows how local and global variables work:
+#!/bin/bash
+PUBLISHER="No Starch Press"
+print_name(){
+local name
+name="Bash Scripting"
+echo "${name} by ${PUBLISHER}"
+}
+print_name
+echo "The variable ${name} will not be printed because it is a local variable."
+We assign the value No Starch Press to the variable publisher, then create a 
+function called print_name(). ( You’ll learn more about functions in the next 
+chapter.) Within the function, we declare a local variable called name and assign it 
+the value "Bash Scripting". Then we call the print_name() function and attempt to 
+access the name variable as part of a sentence to be printed using echo.
+The echo command at the end of the script file will result in an empty variable, as 
+the name variable is locally scoped to the
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+13
+print_name() function, which means that nothing outside of the function can 
+access it. So, it will simply return without a value.
+Save this script, remembering to set the executable permission using chmod, and 
+run it using the following command:
+./local_scope_variable.sh
+The variable will not be printed because it is a local variable.
+Arithmetic Operators
+Arithmetic operators allow you to perform mathematical
+operations on integers. Table 1-3 shows some of the arithmetic operators 
+available. The full list of the available arithmetic operators can be found at 
+https://tldp.org/LDP/abs/html/ops.html.
+Table 1-3 Arithmetic Operators
+Operator
+Description
+ 
+`
++
+Addition
+-
+Subtraction
+*
+Multiplication
+/
+Division
+%
+Modulo
++=
+Incrementing by a constant
+-=
+Decrementing by a constant
+You can perform these arithmetic operations in bash in a few ways: using the let 
+command, using the double parentheses syntax $((expression)), and using the 
+expr command. Let’s
+consider an example of each method.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+14
+Here we perform a multiplication operation using the let command:
+$ **let result="4 * 5"**
+$ **echo $result**
+20
+This command takes a variable name, then performs an
+arithmetic calculation to resolve its value. Next, we perform another multiplication 
+operation using the double parentheses syntax:
+$ **result=$((5 * 5))**
+$ **echo $result**
+25
+In this case, we perform the calculation within double parentheses. Lastly, we 
+perform an addition operation using the expr command:
+$ **result=$(expr 5 + 505)**
+$ **echo $result**
+510
+The expr command evaluates expressions, which don’t have to be arithmetic 
+operations; for example, you might use it to calculate the length of some string. 
+Use man expr to learn more about the capabilities of expr.
+Arrays
+Bash allows you to create single-dimension arrays. Arrays are a collection of 
+elements that are indexed. You can access these
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+15
+elements using their index numbers, where the first indexed number starts from 
+zero. In bash scripts, you might use arrays whenever you need to iterate over a 
+number of strings and run the same commands on each one.
+Here is how to create an array in bash. Save this code to a file named array.sh and 
+execute it.
+#!/bin/bash
+# Set an array
+IP_ADDRESSES=(192.168.1.1 192.168.1.2 192.168.1.3)
+# Print all elements in the array
+echo "${IP_ADDRESSES[*]}"
+# Print only the first element in the array
+echo "${IP_ADDRESSES[0]}"
+This script uses an array named IP_ADDRESSES that contains three IP addresses. 
+The first echo command prints all the elements in the array by passing [*] to the 
+variable name IP_ADDRESSES, which holds the array values. The * is a 
+representation of every array element. Lastly, another echo command prints just 
+the first element in the array by specifying index zero.
+Running this script should produce the following output:
+$ **chmod u+x arrays.sh**
+$ **./arrays.sh**
+192.168.1.1 192.168.1.2 192.168.1.3
+192.168.1.1
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+16
+As you can see, we were able to get bash to print all elements in the array, as well 
+as just the first element.
+You can also delete elements from an array. The following will delete 192.168.1.2 
+from the array:
+IP_ADDRESSES=(192.168.1.1 192.168.1.2 192.168.1.3)
+unset IP_ADDRESSES[1]
+You can even swap one of the values with another value. The following code will 
+replace 192.168.1.1 with 192.168.1.10:
+IP_ADDRESSES[0]="192.168.1.10"
+You’ll find arrays particularly useful when you need to iterate over values and 
+perform actions against them, such as a list of IP addresses to scan (or a list of 
+emails to send a phishing email to).
+ 
+Streams
+Streams are files that act as communication channels between a program and its 
+environment. When you interact with a program (whether a built-in Linux utility 
+such as ls or mkdir or one that you wrote yourself), you’re interacting with one or 
+more streams. In bash, there are three standard data streams, as shown in Table 
+1-4.
+Table 1-4 Streams
+Stream name
+Description
+File descriptor
+number
+Standard Input (stdin)
+Data coming into some program as
+input
+0
+Standard Output
+(stdout)
+Data coming out of a program
+1
+Standard Error (stderr)
+Errors coming out of a program
+2
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+17
+So far, we’ve run a few commands from the terminal and written and executed a 
+simple script. The generated output was all sent to the standard output stream 
+(stdout), or in other words, your terminal screen.
+Scripts can also receive commands as input. When a script is designed to receive 
+input, it reads it from the standard input stream (stdin). Lastly, scripts may display 
+error messages to the screen due to a bug or syntax error in the commands sent 
+to it. These messages are sent to the standard error stream (stderr).
+To illustrate streams, we’ll use the mkdir command to create a few directories and 
+then use ls to list the content of the current directory. Open your terminal and 
+execute the following command:
+$ **mkdir directory1 directory2 directory1**
+mkdir: cannot create directory 'directory1': File exists
+$ **ls -l**
+total 1
+drwxr-xr-x 1 user user 0 Feb 17 09:45 directory1
+drwxr-xr-x 1 user user 0 Feb 17 09:45 directory
+Notice that the mkdir command generated an error. This is because we passed 
+the directory name directory1 twice on the command line. So, when mkdir ran, it 
+created directory1, created directory2, and then failed on the third argument 
+because, at that point, directory1 had already been created. These types of errors 
+are sent to the standard error stream.
+Next, we executed ls-l, which simply listed the directories. The result of the ls 
+command succeeded without any specific errors, so it was sent to the standard 
+output stream.
+You’ll practice working with the standard input stream when we introduce 
+redirection in “Redirection Operators” on page XX.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+18
+Control Operators
+Control operators in bash are tokens that perform a control function. Table 1-5 
+gives an overview of control operators.
+Table 1-5 Bash Control Operators
+Operator
+Description
+&
+Sends a command to the background.
+&&
+Used as a logical AND. The second command in the expression will be
+evaluated only if the first command evaluated to true.
+( and )
+Used for command grouping
+;
+Used as a list terminator. A command following the terminator will run af-
+ter the preceding command has finished, regardless of whether it evalu-
+ates to true or not.
+;;
+Ends a case statement.
+|
+Redirects the output of a command as input to another command.
+||
+Used as a logical OR. The second command will run if the first one evalu-
+ates to false.
+Let’s see some of these control operators in action. The &
+operator sends any command to the background. If you have a list of commands 
+in a shell script, sending the first command to the
+background will allow bash to continue to the next line even if the previous 
+command hasn’t finished its work. Commands that are long-running are often sent 
+to the background to prevent scripts from hanging.
+#!/bin/bash
+# This script will send the sleep command to the background
+echo "Sleeping for 10 seconds..."
+sleep 10 &
+# Creates a file
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+19
+echo "Creating the file test123"
+touch test123
+# Delete a file
+echo "Deleting the file test123"
+rm test123
+ 
+You’ll learn about sending commands to the background in more depth when we 
+discuss job control in Chapter 2.
+The && operator allows us to perform an AND operation between two commands. 
+In this case, the file test123 will be created only if the first command was 
+successful:
+touch test && touch test123
+The () operator allows us to group commands together so they act a single unit 
+when we need to redirect them together:
+(ls; ps)
+This is generally useful when you need to redirect results from multiple commands 
+to some stream, as shown in “Redirection Operations” on page XX.
+The ; operator allows us to run multiple commands irrespective of their exit status:
+ls; ps; whoami
+As a result, each command is executed one after the other, as soon as the 
+previous one finishes.
+The || operator allows us to chain commands together using an OR operator:
+lzl || echo "the lzl command failed"
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+20
+In this example, the echo command will be executed only if the first command 
+fails.
+Redirection Operators
+The three standard streams we highlighted earlier can be
+redirected from one program to another. Redirection is taking some output from 
+one command or script and using it as the input to another. Table 1-6 describes 
+the available redirection operators.
+Table 1-6 Redirection Operators
+Operator
+Description
+>
+Redirects stdout to a file
+>>
+Redirects stdout to a file by appending it to the existing content
+&> or >&
+Redirects stdout and stderr to a file
+&>>
+Redirects stdout and stderr to a file by appending it to the existing
+content
+<
+Redirects input to a command
+<<
+Called a heredocument or heredoc, redirects multiple input lines to a
+com-mand
+ 
+`
+|
+Redirects output of a command as input to another command
+Let’s practice using redirection operators to see how they work with standard 
+streams. The > operator redirects the standard output stream to a file. Any 
+command that precedes this character will send its output to the specified 
+location. Run the following command directly in your terminal:
+$ echo "Hello World!" > output.txt
+We redirected the standard output stream to a file named
+output.txt. To see the content of output.txt, simply run the following:
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+21
+cat output.txt
+Hello World!
+Next, we’ll use the >> operator to append some content to the end of the same 
+file:
+echo "Goodbye!" >> output.txt
+cat hello_output.txt
+Hello World!
+Goodbye!
+Listing 1-10 Append text to a file
+If we used > instead of >>, the content of output.txt would have been overwritten 
+completely with the Goodbye! text.
+You can redirect both the standard output stream and the standard error stream to 
+a file using &>. This is useful when you don’t want to send any output to the 
+screen and instead save everything in a log file (perhaps for later analysis).
+ls -l / &> stdout_and_stderr.txt
+Listing 1-11 Redirecting standard output and standard error streams to a file
+To append both the standard output and standard error streams to a file, simply 
+use double chevron (&>>).
+What if we wanted to send the standard output stream to one file, and the 
+standard error stream to another? This is also possible using the streams’ file 
+descriptor numbers:
+$ ls -l / 1> stdout.txt 2> stderr.txt
+Listing 1-12 Redirecting standard output and standard error to separate files
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+22
+You may sometimes find it useful to redirect the standard error stream to a file, as 
+we’ve done here, so you can log any errors that occur during runtime. For 
+example, the next example runs a non- existent command lzl. This should 
+generate bash errors that will be written into the error.txt file.
+lzl 2> error.txt
+cat error.txt
+bash: lz: command not found
+Listing 1-13 Redirecting the standard error stream using its file descriptor number
+Notice that you didn’t see the error on the screen because bash sent the error to 
+the file instead.
+Next, let’s use the standard input stream. Run the following command in the shell 
+to supply the contents of output.txt as input to the cat command:
+cat < output.txt
+Hello World!
+Goodbye!
+Listing 1-14 Redirecting standard input to the cat command
+What if we wanted to redirect multiple lines to a command? Here document 
+redirection (<<) can help with this:
+$ **cat << EOF**
+**Bash Scripting**
+****
+**EOF**
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+23
+Bash Scripting
+Listing 1-15 A here document
+In this example, we pass multiple lines as input to a command.
+The EOF in this example acts as a delimiter marking the start and end points of the 
+input. Here document redirection treats the input as if it were a separate file, 
+preserving line breaks and whitespace.
+The pipe operator (|) redirects the output of one command and uses it as the input 
+of another. For example, we could run the ls command on the root directory and 
+then use another command to extract some data from it, as shown here:
+$ **ls -l / | grep "bin"**
+lrwxrwxrwx 1 root root 7 Mar 10 08:43 bin -> usr/bin
+lrwxrwxrwx 1 root root 8 Mar 10 08:43 sbin -> usr/sbin
+Listing 1-16 Piping a commands output as input to another command
+We used ls to print the content of the root directory into the standard output 
+stream, then used pipe (|) to send it as input to the grep command, which filtered 
+out any lines containing the word bin.
+Positional Arguments
+Bash scripts can take positional arguments (also called
+parameters) passed on the command line. Arguments are especially useful, for 
+example, when you want to develop a program that modifies its behavior based on 
+some input passed to it by another program or user. Arguments can also change 
+features of the script such as the output format and how verbose it will be during 
+runtime.
+For example, imagine you develop an exploit and send it to a few colleagues, each 
+of whom will use it against a different IP address. Instead of writing a script and 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+24
+asking the user to modify it with their network information, you can write it to take 
+an IP address argument and then act against this input to avoid having to modify 
+the source code in each case.
+A bash script can access arguments passed to it on the command line using the 
+variables $1, $2, and so on. The number represents the order in which the 
+argument was entered. To illustrate this, the following script takes in an argument 
+(an IP address or domain name) and performs a ping test against it using the ping 
+utility.
+Save this file as ping_with_arguments.sh:
+Listing 1-17 A pinger command
+#!/bin/bash
+# This script will ping any address provided as an argument.
+SCRIPT_NAME="${0}"
+TARGET="${1}"
+echo "Running the script ${SCRIPT_NAME}..."
+echo "Pinging the target: ${TARGET}..."
+ping "${TARGET}"
+This script assigns the first positional argument to the variable TARGET. Notice, 
+also, that the argument ${0} is assigned to the SCRIPT_NAME variable. This 
+argument contains the script’s name (in this case, ping_with_arguments.sh).
+To run this script, use the following commands:
+chmod u+x ping_with_arguments.sh
+./ping_with_arguments.sh example.com
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+25
+Running the script ping_with_arguments.sh...
+Pinging the target example.com...
+PING example.com (104.20.120.46) 56(84) bytes of data.
+64 bytes from 104.20.120.46 (104.20.120.46): icmp_seq=1 ttl=57 t
+Listing 1-18 Passing arguments to a script
+This script will perform a ping command against the domain example.com passed 
+to it on the command line. The value was assigned to the $1 variable; if we passed 
+another argument, it would get assigned to the second variable, $2. Use CTRL+C 
+to exit this script, as ping may run indefinitely on some operating systems.
+This script is available at https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch01/ping_with_arguments.sh.
+What if you wanted to access all arguments? You can do so using the variable $@. 
+Also, using $#, you can get the total number of arguments passed. The following 
+script demonstrates how this works:
+#!/bin/bash
+echo "The arguments are: $@"
+echo "The total number of arguments are: $#"
+Save this script to a file named *show_args.sh* and run it as fo
+$ **chmod u+x show_args.sh**
+$ **./show_args.sh "hello" "world"**
+The arguments are: hello world
+The total number of arguments are: 2
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+26
+Table 1-7 summarizes the variables related to positional arguments.
+ 
+`
+Table 1-7 Special Variables Related to Positional Arguments
+Variable
+Description
+$0
+The name of the script file
+$1, $2, $3, […]
+Positional arguments
+$#
+The number of passed positional arguments
+$*
+All positional arguments
+$@
+All positional arguments, where each argument is individually quoted
+When a script makes use of "$*" with the quotes included, bash will expand 
+arguments into a single word. For instance, the
+following groups the arguments into one word:
+$ **script.sh "1" "2" "3"**
+1 2 3
+When a script makes use of "$@" (again including the quotes), it will expand 
+arguments into separate words:
+$ **script.sh "1" "2" "3"**
+1
+2
+3
+In most cases, you will want to use "$@" so that every argument is treated as an 
+individual word.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+27
+Input Prompting
+Some bash scripts don’t take any arguments during execution. However, they may 
+need to ask the user for some information in an interactive way and have the 
+response feed into their runtime. In these cases, we can use the read command. 
+You often see
+applications use input prompting when attempting to install some software, asking 
+the user to enter yes to proceed or no to cancel the operation.
+In the following bash script, we ask the user for their first and last name, then print 
+these to the standard output stream.
+#!/bin/bash
+# Takes input from the user and assigns it to variables.
+echo "What is your first name?"
+read -r firstname
+echo "What is your last name?"
+read -r lastname
+echo "Your first name is ${firstname} and your last name is ${la
+Listing 1-19 Accepting user input with bash
+Save and run this script as input_prompting.sh. Notice that you get prompted to 
+enter information that then get printed:
+$ **chmod u+x input_prompting.sh**
+$**./input_prompting**
+What is your first name?
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+28
+John
+What is your last name?
+Doe
+Your first name is John and your last name is Doe
+Exit Status Codes
+Bash commands return status codes, which indicate whether the execution of the 
+command succeeded. Status codes fall in the 0–255 range, where 0 means 
+success, 1 means failure, 126 means that the command was found but is not 
+executable, and 127 means the command was not found. The meaning of any 
+other number depends on the specific command being used and the logic it uses.
+Checking Status Codes
+To see status codes in action, save the following script to a file named 
+exit_codes.sh and run it.
+#!/bin/bash
+# Experimenting with status codes
+ls -l > /dev/null
+echo "The status code of the ls command was: $?"
+lzl 2> /dev/null
+echo "The status code of the non-existing lzl command was: $?"
+We use the special variable $? with the echo command to return the status codes 
+of the executed commands ls and lzl. We also redirect their standard output and 
+standard error streams to the file /dev/null, a special device file that discards any 
+data sent to it. When you want to silence commands, you can redirect their output 
+to it.
+ 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+29
+`
+You should see output like the following:
+$ ./exit_codes.sh
+The status code of the ls command was: 0
+The status code of the non-existing lzl command was: 127
+As you can see, we received two distinct status codes, one for each command. 
+The first command returned 0 (success), and the second returned 127 (command 
+not found).
+NOTE Use /dev/null with caution. You may miss out on important errors if you 
+choose to redirect output to it. When in doubt, redirect standard streams such as 
+standard output and standard error to a dedicated log file in-stead.
+To understand why you might want to use status codes, imagine you’re trying to 
+download a 1GB file from the internet using bash. It might be wise to first check if 
+the file already exists on the
+filesystem in case someone ran the script already and retrieved it. Also, you might 
+want to check that you have enough free space on the disk before attempting the 
+download. By running commands and looking at their exit status codes, we can 
+decide whether to proceed with the file download.
+Setting a Script’s Exit Codes
+You can set the exit code of a script using the exitcommand, as shown below:
+#!/bin/bash
+# Sets the exit code of the script to be 223
+echo "Exiting with status code: 223"
+exit 223
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+30
+Save this script as set_status_code.sh and run it on the command line, then use 
+the special variable $? to see the status code it returns:
+$ chmod u+x set_status_code.sh
+$ ./set_status_code.sh
+Exiting with status code: 223
+echo $?
+223
+$? to see the status code it returns:
+$ **chmod u+x set_status_code.sh**
+$ **./set_status_code.sh**
+Exiting with status code: 223
+**echo $?**
+223
+You can use the $?variable to check the exit status of a script, but also of 
+individual commands:
+$ **ps -ef**
+$ **echo $?**
+0
+Exit codes are important when you have a series of scripts that call one another. 
+You may have a workflow where one script invokes another depending on a state 
+of a specific condition.
+ 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+31
+ADVANCED BASH CONCEPTS
+This chapter covers bash concepts that can make your scripts more intelligent. 
+You’ll learn how to test
+conditions, use loops, consolidate code into functions, send commands to the 
+background, and more. You’ll also learn some ways of customizing your bash 
+environment for penetration testing.
+Test Operators
+Bash lets us selectively execute commands when certain conditions of interest are 
+met. We can use test operators to craft a wide variety of conditions, such as 
+whether one value equals another value, whether a file is of a certain type, or 
+whether one value is greater than another. We often rely on such tests to 
+determine
+  
+whether to continue running a block of code or not, so being able to construct 
+them is fundamental to bash programming.
+There are multiple kinds of test operators. File test operators allow us to perform 
+tests against files on the filesystem, such as checking if a file is executable or if 
+some directory exists. Table 2-1 shows a short list of the available tests.
+Table 2-1 File Test Operators
+Operator
+Description
+-dFILE
+Checks whether the file is a directory
+-rFILE
+Checks whether the file is readable
+-xFILE
+Checks whether the file is executable
+-wFILE
+Checks whether the file is writable
+-fFILE
+Checks whether the file is a regular file
+-s FILE
+Checks whether the file size is greater than zero
+You can find the full list of file test operators at https://ss64.com/bash/test.html.
+String comparison operators allow us to perform tests related to strings, such as 
+testing whether one string is equal to another. Table 2-2 shows the string 
+comparison operators.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+32
+Table 2-2 String Comparison Operators
+Operator
+Description
+=
+Checks whether a string is equal to another string
+==
+Synonym of = when used within [[ ]] constructs
+!=
+Checks whether a string is not equal to another string
+<
+Checks whether a string comes before another string (in alphabetical
+order)
+>
+Checks whether a string comes after another string (in alphabetical
+order)
+-z
+Checks whether a string is null
+-n
+Checks whether a string is not null
+Integer comparison operators allow us to perform checks on integers, such as if 
+an integer is less than or greater than another. Table 2-3 shows the available 
+operators.
+Table 2-3 Integer Comparison Operators
+Operator
+Description
+-eq
+Checks whether a number is equal to another number
+-ne
+Checks whether a number is not equal to another number
+-ge
+Checks whether a number is greater than or equal to another number
+-gt
+Checks whether a number is greater than another number
+-lt
+Checks whether a number is less than another number
+-le
+Checks whether a number is less than or equal to another number
+Let’s use these operators in flow-control mechanisms to decide what code to run 
+next.
+If Conditions
+In bash, we can use an if condition to execute some code only when a condition is 
+met. Its syntax is as follows:
+if [[ condition ]]; then
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+33
+# do something if the condition is met
+else
+# do something if the condition is not met
+fi
+We start with the if keyword, followed by a test conditions between double 
+brackets ([[ ]]). We then use the ; character to separate the if keyword from the 
+then keyword, which allows us to introduce a block of code that runs only if the 
+condition is true.
+Next, we use the else keyword to introduce a fallback code block that runs if the 
+condition is not met. Note that else is optional, and you may not always need it. 
+Finally, we close the if condition with the fi keyword (which is if inversed).
+N O T E In some operating systems, such as those often used in containers, the 
+default shell might not necessarily be bash. To account for these cases, you may 
+want to use single brackets ([…]) rather than double brackets to enclose your 
+condition. This use of single brackets meets the POSIX standard and should work 
+on almost any Unix derivative, including Linux.
+Let’s see an if condition in practice. Listing 2-1 uses an if condition to test whether 
+a file exists, and if not, creates it.
+#!/bin/bash
+FILENAME="flow_control_with_if.txt"
+if [[ -f "${FILENAME}" ]]; then
+echo "${FILENAME} already exists."
+exit 1
+else
+touch "${FILENAME}"
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+34
+fi
+Listing 2-1 An if condition to test for the existence of a file
+We first create a variable named FILENAME containing the name of the file we 
+need. This saves us from having to repeat the filename in the code. We then 
+introduce the if statement, which uses a condition that tests for the existence of 
+files with the -f file test operator. If this condition is true, we use echo to print to 
+the screen a message explaining that the file already exists and then exit the 
+program using the status code 1 (failure). Using the else block, which will execute 
+only if the file does not exist, we create the file using the touch
+command.
+You can download this script from https://github.com/dolevf/Black-Hat- 
+Bash/blob/master/ch02/test_if_file_exists.sh. Save the file and execute it. You 
+should see the flow_control_with_if.txt file in your current directory when you run 
+ls.
+Listing 2-2 shows a different way of achieving the same outcome; it uses the not 
+operator (!) to check whether a directory doesn’t exist, and if so, creates it. This 
+example has fewer lines of code and eliminates the need for an else block 
+altogether.
+#!/bin/bash
+FILENAME="flow_control_with_if.txt"
+if [[ ! -f "${FILENAME}" ]]; then
+touch "${FILENAME}"
+fi
+Listing 2-2 An example of a file test using a negative check
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+35
+Save and run this script. It should create a directory named downloads if this 
+directory wasn’t already present.
+Let’s explore if conditions that use some of the other kinds of test operators we’ve 
+covered. Listing 2-3 shows an example of a string comparison test. It tests 
+whether two variables are equal by performing string comparison with the equal-
+to operator (==).
+#!/bin/bash
+VARIABLE_ONE="nostarch"
+VARIABLE_TWO="nostarch"
+if [[ "${VARIABLE_ONE}" == "${VARIABLE_TWO}" ]]; then echo "They
+else
+echo "They are not equal!"
+fi
+Listing 2-3 A string comparison test comparing two string variables
+The script will compare the two variables, both of which have the value nostarch, 
+and print They are equal! by using the echo command. It is available at 
+https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/string_comparison.sh.
+Next is an example of an integer comparison test, which takes two integers and 
+checks which one is the larger number.
+#!/bin/bash
+VARIABLE_ONE="10"
+VARIABLE_TWO="20"
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+36
+ 
+if [[ "${VARIABLE_ONE}" -gt "${VARIABLE_TWO}" ]]; then
+echo "${VARIABLE_ONE} is greater than ${VARIABLE_TWO}" else
+echo "${VARIABLE_ONE} is less than ${VARIABLE_TWO}"
+fi
+We create two variables, VARIABLE_ONE and VARIABLE_TWO, and assign them 
+values of 10 and 20, respectively. We then use the -gt operator to compare the 
+two values and print the one that is greater. This script is available at
+https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/integer_comparison.sh.
+Linking Conditions
+So far, we’ve used if to check whether a single condition is met. But like most 
+programming languages, we can also use the or (||) and and (&&) operators to 
+check for multiple conditions at once.
+For example, what if we wanted to check that a file exists and also that its size 
+greater than zero? Listing 2-4 does so.
+#!/bin/bash
+echo "Hello World!" > file.txt
+if [[ -f "file.txt" ]] && [[ -s "file.txt" ]]; then
+echo "The file exists and its size is greater than zero".
+fi
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+37
+Listing 2-4 Chaining two file-test conditions using an and condition
+This code writes some content to a file, then checks whether that file exists and 
+whether its size is greater than zero. Both conditions have to be met in order for 
+the echo command to be executed. If either returns false, nothing will happen.
+To demonstrate an or condition, Listing 2-5 checks whether a file is either of file 
+or directory type:
+#!/bin/bash
+DIR_NAME="dir_test"
+mkdir "${DIR_NAME}"
+if [[ -f "${DIR_NAME}" ]] || [[ -d "${DIR_NAME}" ]]; then echo "
+Listing 2-5 Chaining two file test conditions using or
+This code first creates a directory, then uses an if condition with the or (||) 
+operator to check whether the variable is a file (-f) or directory (-d). The second 
+condition should evaluate to true, and the echo command should execute.
+Running Code Only If a Command Succeeds
+We can even test the exit code of commands to determine if they were successful 
+or not, in this way:
+if command; then
+# command was successful
+fi
+if ! command; then
+# command was unsuccessful
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+38
+fi
+Listing 2-6 Testing the exit code of a command
+You’ll often find yourself using this technique in bash, as commands aren’t 
+guaranteed to succeed. Failures could happen for reasons such as these:
+A lack of the necessary permissions when creating resources
+An attempt to execute a command that is not available on the operating 
+system
+The disk being full when downloading a file
+The network being down while executing network utilities
+To see how this technique works, execute the following in your terminal:
+$ **if touch test123; then**
+**echo "OK: file created"**
+**fi**
+OK: file created
+We attempt to create a file. Because the file creation succeeds, we print a 
+message to indicate this.
+Using elif
+If the first if condition fails, you can check for other conditions by using the elif 
+keyword (short for else if). To show how this works, let’s write a program that 
+checks the arguments passed to it on the command line. The script in Listing 2-7 
+will output a message clarifying whether the argument is a file or a directory.
+#!/bin/bash
+USER_INPUT="${1}"
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+39
+1 if [[ -z "${USER_INPUT}" ]]; then
+echo you must provide an argument!
+exit 1
+fi
+2 if [[ -f "${USER_INPUT}" ]]; then
+echo "${USER_INPUT} is a file"
+3 elif [[ -d "${USER_INPUT}" ]]; then
+echo "${USER_INPUT} is a directory"
+else
+4 echo "${USER_INPUT} is not a file or a directory"
+fi
+Listing 2-7 Using if and elif statements
+We begin with an if statement that checks whether the variable
+USER_INPUT is null 1. This allows us to exit the script early using exit 1 if we 
+receive no command line arguments from the user. We then begin a second if 
+condition that uses the file test operator to check whether the input is a file 2. 
+Below this condition, we use elif to test whether the argument is a directory 3.
+This condition won’t be tested unless the file test fails. If neither of these 
+conditions is true, the script responds that the argument is neither a file nor a 
+directory 4.
+This script is available at https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/if_elif.sh.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+40
+Functions
+Functions help us reuse blocks of code so we can avoid repeating them. They 
+allow us to run multiple commands and other bash code together by simply 
+entering the function’s name. To define a new function, enter a name for it, 
+followed by parentheses (). Then place the code you would like the function to run 
+within curly brackets {}:
+#!/bin/bash
+say_name(){
+echo "Bash Scripting"
+}
+Here, we define a function called say_name that executes a single echo command. 
+To call a function, simply enter its name:
+say_name
+If the function is not called, the commands within it won’t run.
+Returning Values
+Like commands and their exit statuses, functions can return values using the 
+return keyword. If there is no return statement, the function will return the code of 
+the last command it ran. For example, the function in Listing 2-8 returns a different 
+value based on whether the current user is root or not:
+#!/bin/bash
+1 check_if_root(){
+  
+2 if [[ "${EUID}" -eq "0" ]]; then
+return 0
+else
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+41
+return 1
+fi
+}
+3 is_root=$(check_if_root)
+4 if [[ "${is_root}" -eq "0" ]]; then
+echo "user is root!"
+else
+echo "user is not root!"
+fi
+Listing 2-8 An if condition to test whether a function returned true or false
+We define the check_if_root function 1. Within this function, we use an if condition 
+with an integer comparison test 2, accessing the environment variable EUID to get 
+the effective running user’s ID and checking whether it equals 0. If so, the user is 
+root, and the function returns 0; if not, it returns 1. Next, we call the function and 
+assign the result returned to the variable is_root3. Then we use another integer 
+comparison test to determine this value 4. This code is available at 
+https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/check_root_function.sh.
+Bash scripts that perform privileged actions often check whether the user is root 
+before attempting to install software, create users, delete groups, and so on.
+Attempting to perform privileged actions on Linux without the necessary privileges 
+will result in errors, so this check helps handle these cases.
+Accepting Arguments
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+42
+In the previous chapter, we covered the passing of arguments to commands on 
+the command line. Functions can also take arguments using the same syntax. For 
+example, the function in Listing 2-9 prints the first three arguments it receives:
+#!/bin/bash
+print_args(){
+echo "first: ${1}, second: ${2}, third: ${3}" }
+1 print_args No Starch Press
+Listing 2-9 A function with arguments
+To call a function with arguments, simply enter its name and the arguments 
+separated by spaces 1. Save this script as function_with_args.sh and run it:
+$ chmod u+x function_with_args.sh
+$ ./function_with_args.sh
+#!/bin/bash
+print_args(){
+echo "first: ${1}, second: ${2}, third: ${3}" }
+1 print_args One Two Three
+Listing 2-9 A function with arguments
+To call a function with arguments, simply enter its name and the
+$ **chmod u+x function_with_args.sh**
+$ **./function_with_args.sh**
+first: No, second: Starch, third: Press
+You should see similar output.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+43
+Loops and Loop Controls
+Like many programming languages, bash lets you repeat chunks of code using 
+loops. Loops can be particularly useful in your penetration testing adventures 
+because they can help you accomplish tasks such as the following:
+Continuously checking whether an IP address is online after a reboot; once the 
+IP address is detected, stop checking.
+Iterating through a list of hostnames, for example to run a specific exploit 
+against each of them or determine whether there is a firewall protecting them.
+Testing for a certain condition and then running a loop when it is met. For 
+example, checking whether a host is online, and if so, performing a brute force 
+attack against it.
+The following sections introduce you to the three kinds of loops in bash, while, 
+until, and for, as well as the break and continue statements for working with loops.
+while
+In bash, while loops allow you to run a code block until some test returns a 
+successful exit status code. You might use them in penetration testing to
+continuously perform a port scan on a network and pick up any new hosts that 
+join the network, for example.
+Listing 2-10 shows the syntax of a while loop.
+while *some_condition*; do
+# run commands while the condition is true
+done
+Listing 2-10 A while loop
+A while loop starts with the keyword while, followed by an expression that 
+describes the condition. We then surround the code to be executed with the do 
+and done keywords, which define the start and end of the code block.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+44
+You can use while loops to run some chunk of code infinitely by using true as the 
+condition; because true always returns a successful exit code, the code will 
+always run. Let’s use a while loop to repeatedly print a command to the screen. 
+Save this script to a file named basic_while.sh and run it.
+#!/bin/bash
+while true; do
+echo "Looping..."
+sleep 2
+done
+You should see the following output:
+$ chmod u+x basic_while.sh
+$ **./basic_while.sh**
+Looping...
+Looping...
+- *-snip--*
+Next, let’s write a more sophisticated while loop that runs until it finds a specific 
+file on the filesystem (use CTRL+C to stop it from executing at any point):
+#!/bin/bash
+1 SIGNAL_TO_STOP_FILE="stoploop"
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+45
+2 while [[ ! -f "${SIGNAL_TO_STOP_FILE}" ]]; do
+echo "The file ${SIGNAL_TO_STOP_FILE} does not yet exist..." ech
+sleep 2
+done
+3 echo "File was found! exiting..."
+At 1, we define a variable representing the name of the file for which the while 
+loop 2 checks using a file test operator. The loop won’t exit until the condition is 
+satisfied. Once the file is available, the loop will stop, and the script will continue 
+to the echo command 3. Save this file as while_loop.sh and run it:
+$ **chmod u+x while_loop.sh**
+$**./while_loop.sh**
+The file stoploop does not yet exist...
+Checking again in 2 seconds...
+While the script is running, open a second terminal in the same directory as the 
+script and create the stoploop file:
+touch stoploop
+Once you’ve done so, you should see the script breaking out of the loop and print 
+the following:
+File was found! exiting...
+This script is available at https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/while_loop.sh.
+until
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+46
+Although while runs so long as the condition succeeds, until runs so long as it 
+fails. Listing 2-11 shows the until loop syntax.
+until some_condition; do x 
+ run some commands until the condition is no longer false done
+Listing 2-11 The until loop syntax
+Listing 2-12 uses until to run some commands until a file’s size is greater than zero 
+(meaning it is not empty).
+#!/bin/bash
+FILE="output.txt"
+touch "${FILE}"
+until [[ -s "${FILE}" ]]; do
+echo "$FILE is empty..."
+echo "Checking again in 2 seconds..."
+sleep 2
+done
+echo "${FILE} appears to have some content in it!"
+Listing 2-12 An until loop to check a file’s size
+We first create an empty file, then begin a loop that runs until the file is no longer 
+empty. Within the loop, we print some messages to the terminal. Save this file as 
+until_loop.sh and run it:
+$ chmod u+x until_loop.sh
+$ ./until_loop.sh
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+47
+output.txt is empty...
+Checking again in 2 seconds...
+$ **chmod u+x until_loop.sh**
+$ **./until_loop.sh**
+output.txt is empty...
+Checking again in 2 seconds...
+At this point, the script has created the file output.txt, but it’s an empty file. We 
+can check this using the du command:
+**du -sb output.txt**
+output.txt
+Open another terminal and navigate to the location at which your script is saved, 
+then append some content to the file so its size is no longer zero:
+$ echo "until_loop_will_now_stop!" > output.txt
+The script should exit the loop, and you should see it print the following:
+output.txt appears to have some content in it!
+This script is available at https://github.com/dolevf/Black-Hat-
+Bash/blob/master/ch02/until_loop.sh.
+for
+The for loop iterates over a sequence, such as a list of filenames, variables, or 
+even group of values generated by running some command. Inside the for
+loop, we define a block of commands that are run against each value in the list, 
+and each value in the list is assigned to a variable name we define.
+Listing 2-13 shows the syntax of a for loop.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+48
+for variable_name in LIST; do
+# run some commands for each item in the sequence done
+Listing 2-13 The for loop syntax
+A simple way to use a for loop is to execute the same command a number of 
+times. For example, the following code prints the numbers 1 through 10:
+#!/bin/bash
+for index in $(seq 1 10); do
+echo "${index}"
+done
+Save and run this script. You should see the following output:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+A more practical example might use a for loop to run commands against a bunch 
+of IP addresses passed on the command line. The script in Listing 2-14 retrieves 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+49
+all arguments passed to the script, then iterates through them and prints a 
+message for each:
+#!/bin/bash
+for ip_address in "$@"; do
+echo "Taking some action on IP address ${ip_address}" done
+Listing 2-14 A for loop to iterate through command line arguments
+Save this script as for_loop_arguments.sh and run it as follows:
+$ **chmod u+x for_loop_arguments.sh**
+**./for_loop_arguments.sh 10.0.0.1 10.0.0.2 192.168.1.1 192.168
+Taking some action on IP address 10.0.0.1
+Taking some action on IP address 10.0.0.2
+We can even run a for loop on the output of commands such as ls. In Listing 2-15, 
+we print the names of all files in the current working directory:
+#!/bin/bash
+for file in $(ls .); do
+echo "File: ${file}"
+done
+Listing 2-15 A for loop to iterate through a list of files in the current directory
+We use a for loop to iterate over the output of the ls . command, which lists the 
+files in the current directory. Each file will be assigned to the file variable as part 
+of the for loop, so we can then use echo to print its name. This technique would 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+50
+be useful if we wanted to, for example, perform a file upload of all files in the 
+directory or even rename them in bulk.
+The break and continue statements
+Loops can run forever or until a condition is met. But you can also exit a loop at 
+any point using the break keyword. This keyword provides an alternative to the 
+exit command, which would cause the entire script, and not just the loop, to exit. 
+Using break, we can leave the loop and advance to the next code block:
+#!/bin/bash
+while true; do
+echo "in the loop"
+break
+done
+echo "This code block will be reached"
+In this case, the last echo command will be executed.
+The continue statement is used to jump to the next iteration of a loop. You can use 
+it to skip a certain value in a sequence. To illustrate this, let’s create three empty 
+files so we can iterate through them:
+$ touch example_file1 example_file2 example_file3
+Next, our for loop will write some content to each file, excluding the first one, 
+example_file1, which it will leave empty (Listing 2-16).
+#!/bin/bash
+1 for file in example_file*; do
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+51
+if [[ "${file}" == "example_file1" ]]; then echo "Skipping the f
+2 continue
+fi
+echo "${RANDOM}" > "${file}"
+done
+Listing 2-16 The use of continue in a for loop
+We start a for loop using the example_file* glob, which will expand to match the 
+names of all files starting with example_file in the directory where the script runs 1. 
+As a result, the loop should iterate over all three files we created earlier. Within the 
+loop, we use a file test operator to check whether the filename is equal to 
+example_file1 because we want to skip this file and not make any changes to it. If 
+the condition is met, we use the continue statement 2 to proceed to the next 
+iteration, leaving the file unmodified. Later in the loop, we use the echo command 
+with the environment variable ${RANDOM} to generate a random number and 
+write it into the file.
+Save this script as for_loop_continue.sh and execute it in the same directory as 
+the three files.
+$ **chmod u+x for_loop_continue.sh**
+$**./for_loop_continue.sh**
+Skipping the first file.
+If you examine the files, you should see that the first file is empty while the other 
+two contain a random number as a result of the script echoing the value of the 
+${RANDOM} environment variable into them.
+Case Statements
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+52
+In bash, case statements allow you to test multiple conditions in a cleaner way by 
+using more readable syntax. Often, they help you avoid many if conditions, which 
+can become harder to read as they grow in size.
+Listing 2-17 shows the case statement syntax.
+case EXPRESSION in
+PATTERN1)
+# do something if the first condition is met
+;;
+PATTERN2)
+# do something if the second condition is met
+;;
+esac
+case *EXPRESSION* in
+*PATTERN1*)
+# do something if the first condition is met
+;;
+*PATTERN2*)
+# do something if the second condition is met
+;;
+esac
+Listing 2-17 The case statement syntax
+Case statements start with the keyword case followed by some expression, such 
+as a variable you want to match a pattern against. PATTERN1 and
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+53
+PATTERN2 in this example represent some pattern case (such as a regular 
+expression, a string, or an integer) that you want to compare to the expression. To 
+close a case statement, you use the keyword esac (case inverted).
+Let’s take a look at an example case statement that checks whether an IP address 
+is present in a specific private network (Listing 2-17).
+#!/bin/bash
+IP_ADDRESS="${1}"
+case ${IP_ADDRESS} in
+192.168.*)
+echo "Network is 192.168.x.x"
+;;
+10.0.*)
+echo "Network is 10.0.x.x"
+;;
+*)
+echo "Could not identify the network."
+;;
+esac
+Listing 2-18 A case statement to check an IP address and determine its network
+We define a variable that expects one command line argument to be passed (${1}) 
+and saves it to the IP_ADDRESS variable. We then use a pattern to check whether 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+54
+the IP_ADDRESS variable starts with 192.168. and a second pattern to checks 
+whether it starts with 10.0..
+We also define a default wildcard pattern using *, which returns a default message 
+to the user if nothing else has matched.
+Save this file as case_ip_address_check.sh and run it:
+$ chmod u+x case_ip_address_check.sh
+$./case_ip_address_check.sh 192.168.12.55
+Network is 192.168.x.x
+$./case_ip_address_check.sh 212.199.2.2
+Could not identify the network.
+$ **chmod u+x case_ip_address_check.sh**
+$**./case_ip_address_check.sh 192.168.12.55**
+Network is 192.168.x.x
+$**./case_ip_address_check.sh 212.199.2.2**
+Could not identify the network.
+Text Processing and Parsing
+One of the most common things you’ll find yourself doing in bash is processing 
+text. You can parse text on the command line by running one-off commands, or 
+use a script to store parsed data in a variable that you can act on in some way. In 
+both cases, the skill is important to many scenarios.
+To test the commands in this section on your own, download the sample log file 
+from https://github.com/dolevf/Black-Hat-Bash/blob/master/ch02/log.txt. This file 
+is space-separated, and each segment represents a specific data type, such as 
+the client’s source IP address, timestamp, HTTP method, HTTP path, HTTP User 
+Agent field, HTTP status code, and more.
+ 
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+55
+Filtering with grep
+The grep command is one of the most popular Linux commands out there
+today. We use grep to filter out information of interest from streams. At its most
+basic form, you can use it like so (Listing 2-19).
+$ grep "35.237.4.214" log.txt
+Listing 2-19 Filtering for a specific string from a file
+This grep command will read the file and extract any lines containing the IP
+address 35.237.4.214 from it.
+We can even grep for multiple patterns simultaneously. The following
+backslash pipe (\|) acts as an or condition (Listing 2-20).
+$ grep "35.237.4.214\|13.66.139.0" log.txt
+Listing 2-20 Filtering for two specific strings
+Alternatively, you could use multiple grep patterns with the -e argument to
+accomplish the same thing (Listing 2-21).
+$ grep -e "35.237.4.214" -e "13.66.139.0" log.txt
+Listing 2-21 Filtering for two specific strings with grep -e
+As you learned in Chapter 1, we can use the pipe (|) command to provide one
+command’s output as the input to another. In the following example, we run the
+ps command and use grep to filter out a specific line. The ps command lists the
+processes on the system:
+$ ps | grep TTY
+By default, grep is case sensitive. We can make our search case insensitive
+using the -i flag (Listing 2-22).
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+56
+$ ps | grep -i tty
+Listing 2-22 A case-insensitive search with grep
+We can also use grep to exclude lines containing a certain pattern using the
+v argument, like in Listing 2-23.
+$ grep -v "35.237.4.214" log.txt
+Listing 2-23 Excluding lines containing a string
+To print only the matched pattern, and not the entire line at which the matched
+pattern was found, use -o (Listing 2-24).
+$ grep -o "35.237.4.214" log.txt
+Listing 2-24 Printing only the matching pattern
+  
+The command also supports regular expressions, anchoring, grouping, and
+much more. Use the man grep command to read more about its capabilities.
+Filtering with awk
+The awk command is a data processing and extraction Swiss-army knife. You
+can use it to identify and return specific fields from a file. To see how it works,
+take another close look at our log file. What if we needed to print just the IP
+addresses from this file? This is easy to do with awk (Listing 2-25).
+$ awk '{print $1}' log.txt
+Listing 2-25 Printing the first field
+The $1 represents the first field of every line in the file, where the IP
+addresses are. By default, awk treats spaces or tabs as separators or delimiters.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+57
+Using the same syntax, we can print additional fields, such as the timestamps.
+Listing 2-26 filters the first three fields of every line in the file.
+$ awk '{print $1,$2,$3}' log.txt
+Listing 2-26 Printing the first three fields
+Using similar syntax, we can print the first and last field simultaneously. In
+this case, NF represents the last field (Listing 2-27).
+$ awk '{print $1,$NF}' log.txt
+Listing 2-27 Printing the first and last field
+We can also change the default delimiter. For example, if we had a CSV file
+separated by commas, rather than spaces or tabs, we could pass awk the -F flag 
+to
+specify the type of delimiter, as in Listing 2-28.
+$ awk -F',' '{print $1}' example_csv.txt
+Listing 2-28 Printing the first field using a comma delimiter
+We can even use awk to print the first 10 lines of some file. This emulates the
+behavior of the head Linux command. NR represents the total number of records
+and is built into awk (Listing 2-29).
+$ awk 'NR < 10' log.txt
+Listing 2-29 Printing the first 10 lines of a file
+You’ll often find it useful to combine grep and awk. For example, you
+might want to first find the lines in a file containing the IP address 42.236.10.117
+and then print the HTTP paths this IP made a request to (Listing 2-30).
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+58
+$ grep "42.236.10.117" log.txt | awk '{print $7}'
+Listing 2-30 Filtering an IP address and printing the seventh field, representing 
+HTTP paths
+The awk command is a super powerful tool, and we encourage you to dig deeper 
+into its capabilities by running man awk for more information.
+Editing Streams with sed
+The sed (stream editor) command takes actions on text. For example, it can 
+replace the text in a file, modify the text in some command’s output, and even 
+delete selected lines from files.
+Let’s use sed to replace any mentions of the word Mozilla with the word Godzilla 
+in the log.txt file. We use its s (substitution) command and g (global) command to 
+make the substitution across the whole file, rather than to just the first occurrence 
+(Listing 2-31).
+$ sed 's/Mozilla/Godzilla/g' log.txt
+Listing 2-31 Replacing a string with another string
+This will output the modified version of the file but won’t change the original 
+version. You can redirect the output to a new file to save your changes:
+$ sed 's/Mozilla/Godzilla/g' log.txt > newlog.txt
+We could also use sed to remove any whitespace from the file with the / // syntax, 
+which will replace whitespace with nothing, removing it from the output altogether 
+(Listing 2-32).
+$ sed 's/ //g' log.txt
+Listing 2-32 Removing whitespace with sed
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+59
+If you need to delete lines of a file, use the d command. In Listing 2-33, 1d deletes 
+(d) the first line (1).
+$ sed '1d' log.txt
+Listing 2-33 Deleting the first line with sed
+To delete the last line of a file, use the dollar sign ($), which represents the last 
+line, along with d (Listing 2-34).
+$ sed '$d' log.txt
+Listing 2-34 Deleting the last line with sed
+You can also delete multiple lines, such as line 5 and 7 (Listing 2-35).
+$ sed '5,7d' log.txt
+Listing 2-35 Deleting lines 5 and 7
+Lastly, you can print specific line ranges, such as lines 2 through 15 (Listing 2-36).
+$ sed -n '2,15 p' log.txt
+Listing 2-36 Printing line ranges in a file
+When you pass sed the -i argument, it will make the changes to the file itself 
+rather than create a modified copy (Listing 2-37).
+sed -i '1d' log.txt
+Listing 2-37 Making changes to the original file
+This rich utility can do a whole lot more. Use the man sed command to find 
+additional ways to use sed.
+Job Control
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+60
+As you become proficient in bash, you’ll start to build complex scripts that take an 
+hour to complete or must run continuously. Not all scripts need to execute in the 
+foreground, blocking execution of other things. Instead, you may want to run 
+certain scripts as background jobs, either because they take a while to
+complete or because their runtime output isn’t interesting and you care only about 
+the end result.
+Commands that you run in a terminal occupy that terminal until the command is 
+finished. These commands are considered foreground jobs. In Chapter 1, we used 
+the ampersand character (&) to send a command to the background. This 
+command then becomes a background job that allows us to unblock the execution 
+of other commands.
+Managing Background and Foreground Jobs
+To practice working with foreground and background jobs, let’s run a command 
+directly in the terminal and send it to the background:
+$ sleep 100 &
+Notice that we can continue working on the terminal while this sleep command 
+runs for 100 seconds. You can verify the spawned process is running by using the 
+ps command:
+$ ps -ef | grep sleep
+user 1827 1752 cons0 19:02:29 /usr/bin/sleep
+Now that this job is in the background, we can use the jobs command to see what 
+jobs are currently running (Listing 2-38).
+$ **jobs**
+[1]+ Running sleep 100 &
+Listing 2-38 Listing jobs
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+61
+The output shows that the sleep command is in Running state and that its job ID is 
+1.
+ 
+We can migrate the job from the background to the foreground by issuing the fg 
+command and the job ID (Listing 2-39).
+$ **fg %1**
+sleep 100
+Listing 2-39 Sending a job to the foreground
+At this point, the sleep command is occupying the terminal, since it’s running in 
+the foreground. You can press CTRL+Z to suspend the process, which will 
+produce the following output in the jobs table:
+[1]+ Stopped sleep 100
+To send this job to the background again in a running state, use the bg command 
+with the job ID (Listing 2-40).
+$ **bg %1**
+[1]+ sleep 100 &
+Listing 2-40 Sending a job to the background
+Keeping a Job Running After Logout
+Whether you send a job to the background or are running a job in the foreground, 
+the process won’t survive if you close the terminal or log out. If you close the 
+terminal, the process will receive a SIGHUP signal and terminate.
+What if we wanted to keep running a script in the background even after we’ve 
+logged out of the terminal window or closed it? To do so, we could start a script or 
+command with the nohup (no hangup) command prepended (Listing 2-41).
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+62
+$ nohup ./my_script.sh &
+Listing 2-41 Keeping a script running after closing the terminal or logging out
+The nohup command will create a file named nohup.out with standard output 
+stream data. So, make sure you delete this file if you don't want to leave any 
+traces on the disk.
+There are additional ways to run background scripts, such as by plugging into 
+system and service managers like systemd, which provide additional features, 
+such as monitoring that the process is running, restarting it if it isn’t, and capturing 
+failures. We encourage you to read more about systemd if you have such use-
+cases at https://man7.org/linux/man-pages/man1/init.1.html.
+Bash Customizations for Penetration Testers
+As penetration testers, we often follow standard workflows for all ethical hacking 
+engagements, whether they be consulting work, bug bounty hunting, or red 
+teaming. We can optimize some of this work with a few bash tips and tricks.
+Placing Scripts in Searchable Paths
+Bash searches for programs within directories defined by the PATH
+environment variable. Commands such as ls are always available to you because 
+system and user binaries are located in directories that are part of the PATH.
+To see your PATH, run the following command:
+$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+$ **echo $PATH**
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+The output might change depending on the operating system you use.
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+63
+When you write a bash script, place it in a directory such as /usr/local/bin, which, 
+as you can see, is part of the PATH. If you don’t do this, you have a few other 
+options available to you:
+Call the script directly using the full path.
+Change the directory to the one in which your script lives and execute it from 
+there.
+Use aliases (shown in the next section).
+Adding additional paths to the PATH environment variable
+The benefit of placing the script in a searchable path is that you can simply call it 
+by its name. You don’t have to provide the full path or have the terminal be in the 
+same directory.
+Shortening Commands with Aliases
+When you find yourself frequently using a long Linux command, you can make 
+use of an alias to map it to a shorter custom name that will save you time when 
+you need to run it.
+For example, imagine that you often use Nmap with special parameters to scan for 
+all 65,535 ports on a given IP address:
+nmap -vv -T4 -p- -sV --max-retries 5 localhost
+This command is quite hard to remember. With aliases, we can make it more 
+accessible on the command line or to our scripts. Here, we assign the command 
+to the alias quickmap:
+$ alias quicknmap="nmap -vv -T4 -p- -sV --max-retries 5 localhos
+Now we can run the aliased command using the name of the alias:
+$ quicknmap
+Starting Nmap 7.80 ( https://nmap.org ) at 2023-02-21 22:32 EST
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+64
+PORT STATE SERVICE
+631/tcp open ipp
+You can even assign an alias to your own scripts:
+$ alias helloworld="bash ~/scripts/helloworld.sh"
+Aliases aren’t permanent, but they can be. In the next section, you’ll learn how to 
+use bash profiles to make permanent changes to your shell.
+Customizing the Bash Run Commands Profile (bashrc)
+We can use the ~/.bashrc file to load functions, variables, and just about any other 
+custom bash code we desire into a new bash session. For example, we can create 
+variables containing information we’ll frequently need to access, such as the IP 
+address of a vulnerable host we’re testing.
+For example, we could append the following to the end of the ~/.bashrc file. These 
+lines define a few custom variables and save our aliased Nmap command:
+VULN_HOST=1.0.0.22
+VULN_ROUTER=10.0.0.254
+alias quicknmap="nmap -vv -T4 -p- -sV --max-retries 5 example.lo
+The next time you open a terminal, you’ll be able to access these values. Make 
+these new values available immediately by re-importing the ~/.bashrc file using 
+the source command:
+$ **source ~/.bashrc**
+$ **echo $VULN_HOST**
+10.0.0.22
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+65
+$ **echo $VULN_ROUTER**
+10.0.0.254
+Now you can use these variables even after you close the terminal and start a new 
+session.
+Importing Custom Scripts
+Another way to introduce changes to your bash session is to create a dedicated 
+script that contains pentesting-related customizations and have the ~/.bashrc file 
+import it using the source command. To achieve this, create a ~/.pentest.sh file 
+containing your new logic, and then make a one-time modification to ~/.bashrc to 
+import it at the end of the file:
+source ~/.pentest.sh
+ 
+Note that you can also source a bash file using the . command, as in Listing 42.
+. ~/.pentest.sh
+Listing 2-42 An alternative to the source command
+Capturing Terminal Session Activity
+Penetration testing often involves having dozens of terminals open
+simultaneously, all running many tools that can produce a lot of output. When we 
+find something of interest, we may need some of that output as evidence for later. 
+To avoid losing track of an important piece of information, we can make use of 
+some clever bash.
+The script command allows us to capture terminal session activity. One way to 
+use it is to load a small bash script that uses script to save every session to a file 
+for later inspection. The script might look like this:
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+66
+#!/bin/bash
+FILENAME="$(date +%m-%d-%y)_${RANDOM}.log"
+if [[ ! -d ~/sessions ]]; then
+mkdir ~/sessions
+fi
+# Starting a script session
+script -f -a "~/sessions/${FILENAME}"
+Having ~/.bashrc load this script, as showed earlier, will result in the creation of 
+the ~/sessions directory containing each terminal session capture in a separate 
+file. The recording stops once you enter exit in the terminal or close the entire 
+terminal window.
+ 
+ 
+  
+ 
+ 
+ 
+  
+
+Hacking with Kali Linux - Part 2 - Bash Scripting
+67
